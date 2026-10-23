@@ -429,7 +429,7 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
         <button
           onClick={() => {
             if (confirm('Deseja realmente reiniciar todo o jogo e placar?')) {
-              window.location.href = '/';
+              actions.resetGame();
             }
           }}
           className="px-4 py-2 text-sm bg-rose-500/20 hover:bg-rose-500/40 border border-rose-500/40 text-rose-200 rounded-xl transition-all flex items-center gap-2 font-semibold"
