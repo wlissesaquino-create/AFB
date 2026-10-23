@@ -51,22 +51,26 @@ function App() {
     if (stored) setPlayerId(stored);
   }, []);
 
-  const handleCreateRoom = useCallback(async () => {
-    const code = generateRoomCode();
+ const handleCreateRoom = useCallback(async (customCode?: string) => {
+    // 1. Pede para o organizador digitar o nome da sala
+    const inputCode = customCode || window.prompt("Digite o código da sala que deseja criar (ex: SALA123):");
+    
+    // Se o usuário cancelar ou deixar em branco, não faz nada
+    if (!inputCode) return; 
+
+    // Remove espaços e deixa tudo em maiúsculo
+    const code = inputCode.trim().toUpperCase();
+    
+    // 2. Tenta criar a sala no banco
     const room = await actions.createRoom(code);
+    
     if (room) {
       setRoomCode(code);
       setRoute({ name: 'organizer', roomCode: code });
       window.history.replaceState(null, '', `/admin?code=${code}`);
     } else {
-      // Room code collision — try again
-      const code2 = generateRoomCode();
-      const room2 = await actions.createRoom(code2);
-      if (room2) {
-        setRoomCode(code2);
-        setRoute({ name: 'organizer', roomCode: code2 });
-        window.history.replaceState(null, '', `/admin?code=${code2}`);
-      }
+      // 3. Se a sala já existir, avisa o organizador
+      alert('Ops! Esse código de sala já está em uso. Tente outro!');
     }
   }, [actions]);
 
