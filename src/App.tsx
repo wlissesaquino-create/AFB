@@ -1,11 +1,13 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, type ReactNode } from 'react';
 import { Bubbles } from '@/components/Effects';
 import { HomePage } from '@/components/HomePage';
 import { AdminGate } from '@/components/AdminGate';
 import { OrganizerView } from '@/components/OrganizerView';
 import { PlayerView } from '@/components/PlayerView';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useRoom, useGameActions } from '@/lib/useGame';
 import { generateRoomCode, isMobile } from '@/lib/utils';
+import { useI18n } from '@/lib/i18n';
 import { supabase, type Player } from '@/lib/supabase';
 
 type Route =
@@ -14,7 +16,20 @@ type Route =
   | { name: 'organizer'; roomCode: string }
   | { name: 'player'; roomCode: string };
 
+function Page({ bubbles, children }: { bubbles: number; children: ReactNode }) {
+  return (
+    <div className="relative min-h-screen">
+      <Bubbles count={bubbles} />
+      <div className="relative z-20 flex justify-end px-4 pt-4">
+        <LanguageSwitcher />
+      </div>
+      {children}
+    </div>
+  );
+}
+
 function App() {
+  const { t } = useI18n();
   const [route, setRoute] = useState<Route>({ name: 'home' });
   const [roomCode, setRoomCode] = useState<string | null>(null);
   const [playerId, setPlayerId] = useState<string | null>(null);
@@ -110,77 +125,73 @@ function App() {
   // Loading screen
   if (roomCode && gameState.loading) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center">
-        <Bubbles count={12} />
-        <div className="relative z-10 text-center space-y-3">
-          <div className="text-5xl animate-bounce inline-block">🌊</div>
-          <div className="text-lg font-bold text-cyanNeon animate-pulse">Conectando...</div>
+      <Page bubbles={12}>
+        <div className="relative z-10 min-h-[80vh] flex items-center justify-center">
+          <div className="text-center space-y-3">
+            <div className="text-5xl animate-bounce inline-block">🌊</div>
+            <div className="text-lg font-bold text-cyanNeon animate-pulse">{t('common.connecting')}</div>
+          </div>
         </div>
-      </div>
+      </Page>
     );
   }
 
   // Room not found
   if (roomCode && !gameState.loading && !gameState.room) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center px-4">
-        <Bubbles count={12} />
-        <div className="glass-card-glow rounded-3xl p-8 max-w-sm w-full text-center space-y-4 relative z-10">
-          <div className="text-5xl">😢</div>
-          <h2 className="text-xl font-extrabold text-white">Sala não encontrada</h2>
-          <p className="text-sm text-slate-300">
-            A sala <span className="font-mono text-yellowNeon">{roomCode}</span> não existe ou foi fechada.
-          </p>
-          <button
-            onClick={() => {
-              setRoomCode(null);
-              setRoute({ name: 'home' });
-              window.history.replaceState(null, '', '/');
-            }}
-            className="w-full py-3 bg-gradient-to-r from-cyanNeon to-blue-500 text-ocean-900 font-black rounded-2xl transition-all active:scale-95"
-          >
-            Voltar ao Início
-          </button>
+      <Page bubbles={12}>
+        <div className="relative z-10 min-h-[80vh] flex items-center justify-center px-4">
+          <div className="glass-card-glow rounded-3xl p-8 max-w-sm w-full text-center space-y-4">
+            <div className="text-5xl">😢</div>
+            <h2 className="text-xl font-extrabold text-white">{t('app.roomNotFound')}</h2>
+            <p className="text-sm text-slate-300">{t('app.roomNotFoundDesc', { code: roomCode })}</p>
+            <button
+              onClick={() => {
+                setRoomCode(null);
+                setRoute({ name: 'home' });
+                window.history.replaceState(null, '', '/');
+              }}
+              className="w-full py-3 bg-gradient-to-r from-cyanNeon to-blue-500 text-ocean-900 font-black rounded-2xl transition-all active:scale-95"
+            >
+              {t('app.backHome')}
+            </button>
+          </div>
         </div>
-      </div>
+      </Page>
     );
   }
 
   // Render based on route
   if (route.name === 'home') {
     return (
-      <div className="relative min-h-screen">
-        <Bubbles count={16} />
+      <Page bubbles={16}>
         <HomePage onCreateRoom={handleCreateRoom} onJoinRoom={handleJoinRoom} />
-      </div>
+      </Page>
     );
   }
 
   if (route.name === 'admin-gate') {
     return (
-      <div className="relative min-h-screen">
-        <Bubbles count={12} />
+      <Page bubbles={12}>
         <AdminGate onUnlock={handleAdminUnlock} onBack={() => setRoute({ name: 'home' })} />
-      </div>
+      </Page>
     );
   }
 
   if (route.name === 'organizer' && gameState.room) {
     return (
-      <div className="relative min-h-screen">
-        <Bubbles count={20} />
+      <Page bubbles={20}>
         <canvas id="confetti-canvas" className="fixed inset-0 pointer-events-none z-[999]" />
         <div className="max-w-7xl mx-auto px-4 py-6">
           <OrganizerView room={gameState.room} players={gameState.players} />
         </div>
-      </div>
+      </Page>
     );
   }
 
   if (route.name === 'player' && gameState.room) {
     return (
-      <div className="relative min-h-screen">
-        <Bubbles count={10} />
+      <Page bubbles={10}>
         <PlayerView
           room={gameState.room}
           player={myPlayer}
@@ -188,16 +199,15 @@ function App() {
           onJoin={handleJoinAsPlayer}
           onLeave={handleLeaveRoom}
         />
-      </div>
+      </Page>
     );
   }
 
   // Fallback
   return (
-    <div className="relative min-h-screen">
-      <Bubbles count={12} />
+    <Page bubbles={12}>
       <HomePage onCreateRoom={handleCreateRoom} onJoinRoom={handleJoinRoom} />
-    </div>
+    </Page>
   );
 }
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Lock, ArrowLeft } from 'lucide-react';
+import { useI18n } from '@/lib/i18n';
 
 interface AdminGateProps {
   onUnlock: () => void;
@@ -9,6 +10,7 @@ interface AdminGateProps {
 export function AdminGate({ onUnlock, onBack }: AdminGateProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const { t } = useI18n();
 
   const ADMIN_PASSWORD = 'afunda2024';
 
@@ -17,7 +19,7 @@ export function AdminGate({ onUnlock, onBack }: AdminGateProps) {
       sessionStorage.setItem('admin_unlocked', 'true');
       onUnlock();
     } else {
-      setError('Senha incorreta. Tente novamente.');
+      setError(t('admin.wrongPassword'));
       setPassword('');
     }
   };
@@ -42,8 +44,8 @@ export function AdminGate({ onUnlock, onBack }: AdminGateProps) {
           <div className="w-16 h-16 rounded-2xl bg-cyanNeon/20 border border-cyanNeon/40 flex items-center justify-center mx-auto">
             <Lock className="w-8 h-8 text-cyanNeon" />
           </div>
-          <h2 className="text-2xl font-extrabold text-white">Acesso do Organizador</h2>
-          <p className="text-xs text-slate-300">Digite a senha para acessar o painel de controle</p>
+          <h2 className="text-2xl font-extrabold text-white">{t('admin.title')}</h2>
+          <p className="text-xs text-slate-300">{t('admin.subtitle')}</p>
         </div>
 
         <div className="space-y-3 text-left">
@@ -56,7 +58,7 @@ export function AdminGate({ onUnlock, onBack }: AdminGateProps) {
                 setError('');
               }}
               onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
-              placeholder="Senha do organizador"
+              placeholder={t('admin.passwordPlaceholder')}
               className="w-full bg-ocean-900 border border-cyanNeon/50 rounded-xl px-4 py-3 text-white font-medium focus:outline-none focus:border-cyanNeon text-center"
               autoFocus
             />
@@ -69,12 +71,12 @@ export function AdminGate({ onUnlock, onBack }: AdminGateProps) {
             onClick={handleSubmit}
             className="w-full py-3.5 bg-gradient-to-r from-cyanNeon to-blue-500 hover:from-cyan-400 hover:to-blue-600 text-ocean-900 font-black rounded-2xl transition-all active:scale-95"
           >
-            ENTRAR NO PAINEL
+            {t('admin.submit')}
           </button>
         </div>
 
         <div className="text-xs text-slate-500 border-t border-white/10 pt-3">
-          Senha padrão: <span className="font-mono text-cyanNeon/60">afunda2024</span>
+          {t('admin.defaultPasswordHint')} <span className="font-mono text-cyanNeon/60">afunda2024</span>
         </div>
       </div>
     </div>

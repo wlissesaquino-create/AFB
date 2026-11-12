@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { Users, Search, Trophy, Play, Timer, RotateCcw, ChevronRight, Anchor, LifeBuoy, FlaskConical, Sparkles } from 'lucide-react';
 import type { Room, Player } from '@/lib/supabase';
 import { useGameActions } from '@/lib/useGame';
+import { useI18n } from '@/lib/i18n';
 import { ITEM_PRESETS } from '@/lib/utils';
 import { Bubbles, triggerConfetti } from '@/components/Effects';
 import { Aquarium } from '@/components/Aquarium';
@@ -14,6 +15,7 @@ interface OrganizerViewProps {
 
 export function OrganizerView({ room, players }: OrganizerViewProps) {
   const actions = useGameActions(room, null);
+  const { t, lang } = useI18n();
   const [objectName, setObjectName] = useState(room.current_object_name);
   const [emoji, setEmoji] = useState(room.current_emoji);
   const [timerSeconds, setTimerSeconds] = useState(room.timer_seconds);
@@ -73,17 +75,17 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
   const statusPill = () => {
     switch (room.status) {
       case 'lobby':
-        return { text: 'Aguardando Início', cls: 'bg-slate-500/20 text-slate-300 border-slate-500/40' };
+        return { text: t('org.statusWaiting'), cls: 'bg-slate-500/20 text-slate-300 border-slate-500/40' };
       case 'countdown':
-        return { text: '3, 2, 1... Contagem!', cls: 'bg-yellowNeon/20 text-yellowNeon border-yellowNeon/40 animate-pulse' };
+        return { text: t('org.statusCountdown'), cls: 'bg-yellowNeon/20 text-yellowNeon border-yellowNeon/40 animate-pulse' };
       case 'voting':
-        return { text: 'Votação Aberta nos Celulares!', cls: 'bg-cyanNeon/20 text-cyanNeon border-cyanNeon/40 animate-pulse' };
+        return { text: t('org.statusVoting'), cls: 'bg-cyanNeon/20 text-cyanNeon border-cyanNeon/40 animate-pulse' };
       case 'testing':
-        return { text: 'Teste em Execução', cls: 'bg-yellowNeon/20 text-yellowNeon border-yellowNeon/40 animate-pulse' };
+        return { text: t('org.statusTesting'), cls: 'bg-yellowNeon/20 text-yellowNeon border-yellowNeon/40 animate-pulse' };
       case 'result':
-        return { text: `Resultado: ${room.current_result}!`, cls: 'bg-emeraldNeon/20 text-emeraldNeon border-emeraldNeon/40' };
+        return { text: t('org.statusResult', { result: room.current_result === 'BOIA' ? t('common.float') : t('common.sink') }), cls: 'bg-emeraldNeon/20 text-emeraldNeon border-emeraldNeon/40' };
       default:
-        return { text: 'Jogo Finalizado', cls: 'bg-slate-500/20 text-slate-300 border-slate-500/40' };
+        return { text: t('org.statusFinished'), cls: 'bg-slate-500/20 text-slate-300 border-slate-500/40' };
     }
   };
   const pill = statusPill();
@@ -98,11 +100,11 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
         <div className="flex items-center gap-4">
           <QRCode value={joinUrl} size={120} />
           <div>
-            <div className="text-xs uppercase tracking-widest text-cyanNeon font-bold">Código da Sala</div>
+            <div className="text-xs uppercase tracking-widest text-cyanNeon font-bold">{t('org.roomCode')}</div>
             <div className="text-3xl sm:text-5xl font-black text-yellowNeon tracking-wider drop-shadow-[0_0_12px_rgba(255,214,0,0.5)]">
               {room.code}
             </div>
-            <p className="text-xs text-slate-300 mt-1">Pais entram com este código no celular</p>
+            <p className="text-xs text-slate-300 mt-1">{t('org.roomCodeHint')}</p>
           </div>
         </div>
 
@@ -111,11 +113,11 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
           <div>
             <div className="flex items-baseline gap-1">
               <span className="text-3xl font-black text-white">{players.length}</span>
-              <span className="text-sm text-slate-400">participantes</span>
+              <span className="text-sm text-slate-400">{t('org.participants')}</span>
             </div>
             <div className="text-xs text-emeraldNeon font-bold flex items-center gap-1">
               <span className="w-2 h-2 rounded-full bg-emeraldNeon animate-ping" />
-              Lobby Conectado
+              {t('org.lobbyConnected')}
             </div>
           </div>
         </div>
@@ -128,27 +130,27 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
           <div className="glass-card rounded-2xl p-5 border-t-2 border-t-yellowNeon space-y-4">
             <h2 className="text-lg font-bold text-yellowNeon flex items-center gap-2">
               <FlaskConical className="w-5 h-5" />
-              Cadastrar Objeto da Rodada
+              {t('org.setupItem')}
               <span className="text-xs bg-yellowNeon/20 text-yellowNeon px-2.5 py-0.5 rounded-full border border-yellowNeon/40">
-                Rodada {room.round_number}
+                {t('common.round', { n: room.round_number })}
               </span>
             </h2>
 
             <div className="space-y-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Nome do Item:</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">{t('org.itemName')}</label>
                 <input
                   type="text"
                   value={objectName}
                   onChange={(e) => setObjectName(e.target.value)}
                   disabled={room.status !== 'lobby'}
-                  placeholder="Ex: Elefante de Brinquedo"
+                  placeholder={t('org.itemNamePlaceholder')}
                   className="w-full bg-ocean-900/90 border border-cyanNeon/40 rounded-xl px-3 py-2 text-white font-medium focus:outline-none focus:border-cyanNeon disabled:opacity-50"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Emoji Exibido no Aquário:</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">{t('org.emojiLabel')}</label>
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -159,13 +161,13 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
                     className="w-16 text-center text-2xl bg-ocean-900/90 border border-cyanNeon/40 rounded-xl px-2 py-1 text-white font-medium focus:outline-none focus:border-cyanNeon disabled:opacity-50"
                   />
                   <div className="text-xs text-slate-400 flex-1 flex items-center">
-                    Este emoji vai flutuar ou afundar no aquário!
+                    {t('org.emojiHint')}
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-2">Tempo de Votação:</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-2">{t('org.votingTime')}</label>
                 <div className="flex gap-2">
                   {[10, 15, 20].map((s) => (
                     <button
@@ -187,20 +189,20 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
 
               <div>
                 <label className="block text-[11px] font-bold text-cyan-200 mb-1.5 uppercase tracking-wider">
-                  Sugestões Rápidas:
+                  {t('org.quickSuggestions')}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {ITEM_PRESETS.map((preset) => (
                     <button
-                      key={preset.name}
+                      key={preset.name.en}
                       onClick={() => {
-                        setObjectName(preset.name);
+                        setObjectName(preset.name[lang]);
                         setEmoji(preset.emoji);
                       }}
                       disabled={room.status !== 'lobby'}
                       className="text-xs bg-white/10 hover:bg-cyanNeon/30 px-2.5 py-1 rounded-lg border border-white/10 transition-all disabled:opacity-50"
                     >
-                      {preset.emoji} {preset.name}
+                      {preset.emoji} {preset.name[lang]}
                     </button>
                   ))}
                 </div>
@@ -215,7 +217,7 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
                   className="w-full py-3.5 bg-gradient-to-r from-cyanNeon to-blue-500 hover:from-cyan-400 hover:to-blue-600 text-ocean-900 font-extrabold rounded-xl shadow-lg transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-2 text-base"
                 >
                   <Play className="w-5 h-5" />
-                  ABRIR VOTAÇÃO NOS CELULARES
+                  {t('org.openVoting')}
                 </button>
               )}
 
@@ -225,7 +227,7 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
                   className="w-full py-3.5 bg-gradient-to-r from-yellowNeon to-amber-500 hover:from-yellow-300 hover:to-amber-600 text-ocean-900 font-extrabold rounded-xl shadow-lg transition-all duration-300 transform active:scale-95 flex items-center justify-center gap-2 text-base"
                 >
                   <FlaskConical className="w-5 h-5" />
-                  INICIAR TESTE EM EXECUÇÃO
+                  {t('org.startTest')}
                 </button>
               )}
 
@@ -236,25 +238,25 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
                     className="py-3.5 bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white font-extrabold rounded-xl border border-indigo-400/50 shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2"
                   >
                     <Anchor className="w-5 h-5" />
-                    AFUNDOU!
+                    {t('org.sankButton')}
                   </button>
                   <button
                     onClick={() => actions.revealResult('BOIA')}
                     className="py-3.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-extrabold rounded-xl border border-emerald-400/50 shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2"
                   >
                     <LifeBuoy className="w-5 h-5" />
-                    BOIOU!
+                    {t('org.floatedButton')}
                   </button>
                 </div>
               )}
 
               {room.status === 'result' && (
                 <button
-                  onClick={() => actions.nextRound('Maçã', '🍎')}
+                  onClick={() => actions.nextRound(ITEM_PRESETS[1].name[lang], ITEM_PRESETS[1].emoji)}
                   className="w-full py-3.5 bg-gradient-to-r from-emerald-400 to-cyanNeon text-ocean-900 font-extrabold rounded-xl shadow-lg transition-all duration-300 flex items-center justify-center gap-2"
                 >
                   <ChevronRight className="w-5 h-5" />
-                  PRÓXIMA RODADA
+                  {t('org.nextRound')}
                 </button>
               )}
             </div>
@@ -263,9 +265,9 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
           {/* Vote bar */}
           <div className="glass-card rounded-2xl p-5 space-y-3">
             <div className="flex justify-between items-center">
-              <h3 className="text-xs font-bold text-cyan-200 uppercase tracking-wider">Palpites Recebidos</h3>
+              <h3 className="text-xs font-bold text-cyan-200 uppercase tracking-wider">{t('org.votesReceived')}</h3>
               <span className="text-xs bg-cyanNeon/20 text-cyanNeon px-2.5 py-0.5 rounded-full font-mono font-bold">
-                {votedPlayers.length} / {players.length} Votaram
+                {t('org.votedCount', { voted: votedPlayers.length, total: players.length })}
               </span>
             </div>
             <div className="h-6 w-full bg-ocean-900 rounded-full overflow-hidden p-1 flex border border-white/10">
@@ -273,13 +275,13 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
                 className="bg-gradient-to-r from-emerald-400 to-cyanNeon h-full rounded-l-full transition-all duration-500 flex items-center justify-center text-[10px] text-ocean-900 font-black"
                 style={{ width: `${boiaPct}%` }}
               >
-                {totalVotes > 0 && `BOIA ${boiaPct}%`}
+                {totalVotes > 0 && `${t('common.float')} ${boiaPct}%`}
               </div>
               <div
                 className="bg-gradient-to-r from-purple-500 to-indigo-600 h-full rounded-r-full transition-all duration-500 flex items-center justify-center text-[10px] text-white font-black"
                 style={{ width: `${afundaPct}%` }}
               >
-                {totalVotes > 0 && `AFUNDA ${afundaPct}%`}
+                {totalVotes > 0 && `${t('common.sink')} ${afundaPct}%`}
               </div>
             </div>
           </div>
@@ -289,7 +291,7 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
         <div className="lg:col-span-7">
           <div className="glass-card rounded-2xl p-6 h-full flex flex-col justify-between items-center relative overflow-hidden border border-cyanNeon/40 min-h-[440px]">
             <div className="w-full text-center z-10">
-              <span className="text-xs uppercase tracking-widest text-cyanNeon font-bold">Objeto em Experimento</span>
+              <span className="text-xs uppercase tracking-widest text-cyanNeon font-bold">{t('org.objectUnderTest')}</span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-1 drop-shadow-md">
                 {room.current_object_name} {room.current_emoji}
               </h2>
@@ -304,7 +306,7 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
               <div className="w-full text-center py-2 px-4 rounded-xl bg-white/5 border border-white/10 z-10">
                 <span className="text-sm font-bold text-cyanNeon flex items-center justify-center gap-2">
                   <Sparkles className="w-4 h-4" />
-                  Resultado: {room.current_result === 'BOIA' ? '🎈 Boiou!' : '⚓ Afundou!'}
+                  {t('org.resultLabel', { result: room.current_result === 'BOIA' ? t('org.floatedResult') : t('org.sankResult') })}
                 </span>
               </div>
             )}
@@ -318,9 +320,9 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
           <div>
             <h3 className="text-base font-bold text-cyanNeon flex items-center gap-2">
               <Users className="w-5 h-5" />
-              Lobby de Participantes ({players.length} Conectados)
+              {t('org.lobbyTitle', { n: players.length })}
             </h3>
-            <p className="text-xs text-slate-300">Grade otimizada para monitorar até 150+ pais ao vivo</p>
+            <p className="text-xs text-slate-300">{t('org.lobbySubtitle')}</p>
           </div>
           <div className="w-full sm:w-64 relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -328,7 +330,7 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar participante..."
+              placeholder={t('org.searchPlaceholder')}
               className="w-full bg-ocean-900/80 border border-cyanNeon/30 rounded-xl pl-9 pr-3 py-1.5 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyanNeon"
             />
           </div>
@@ -338,8 +340,8 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
           {filteredPlayers.length === 0 ? (
             <div className="col-span-full py-8 text-center text-xs text-slate-400">
               {players.length === 0
-                ? 'Nenhum pai/família entrou na sala ainda. Compartilhe o código!'
-                : 'Nenhum participante encontrado na busca.'}
+                ? t('org.noPlayers')
+                : t('org.noSearchResults')}
             </div>
           ) : (
             filteredPlayers.map((p) => (
@@ -349,13 +351,13 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
               >
                 <div className="min-w-0 flex-1">
                   <div className="text-xs font-bold text-white truncate" title={p.name}>{p.name}</div>
-                  <div className="text-[10px] text-yellowNeon font-mono font-bold">{p.score} pts</div>
+                  <div className="text-[10px] text-yellowNeon font-mono font-bold">{t('common.pts', { n: p.score })}</div>
                 </div>
                 <div>
                   {p.last_vote === 'BOIA' ? (
-                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/30">BOIA</span>
+                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/20 px-1.5 py-0.5 rounded border border-emerald-500/30">{t('common.float')}</span>
                   ) : p.last_vote === 'AFUNDA' ? (
-                    <span className="text-[9px] font-bold text-purple-300 bg-purple-500/20 px-1.5 py-0.5 rounded border border-purple-500/30">AFUNDA</span>
+                    <span className="text-[9px] font-bold text-purple-300 bg-purple-500/20 px-1.5 py-0.5 rounded border border-purple-500/30">{t('common.sink')}</span>
                   ) : (
                     <span className="text-[9px] text-slate-400 bg-slate-500/20 px-1.5 py-0.5 rounded">...</span>
                   )}
@@ -371,31 +373,31 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
         <div className="lg:col-span-5 glass-card rounded-2xl p-5 space-y-4">
           <h3 className="text-base font-bold text-yellowNeon flex items-center gap-2">
             <Trophy className="w-5 h-5" />
-            Pódio dos Campeões (Top 3)
+            {t('org.podiumTitle')}
           </h3>
           <Podium players={sortedPlayers} />
         </div>
 
         <div className="lg:col-span-7 glass-card rounded-2xl p-5 space-y-3">
           <div className="flex justify-between items-center border-b border-white/10 pb-2">
-            <h3 className="text-base font-bold text-cyan-200">Classificação Geral</h3>
-            <span className="text-xs text-slate-400">Pontos por acerto + velocidade</span>
+            <h3 className="text-base font-bold text-cyan-200">{t('org.standings')}</h3>
+            <span className="text-xs text-slate-400">{t('org.standingsHint')}</span>
           </div>
           <div className="overflow-y-auto max-h-56 pr-1">
             <table className="w-full text-left text-xs">
               <thead className="text-slate-400 uppercase border-b border-white/10 sticky top-0 bg-ocean-900/90 backdrop-blur-sm">
                 <tr>
-                  <th className="py-2">Pos.</th>
-                  <th className="py-2">Nome / Família</th>
-                  <th className="py-2 text-center">Último Palpite</th>
-                  <th className="py-2 text-right">Pontos</th>
+                  <th className="py-2">{t('org.colPos')}</th>
+                  <th className="py-2">{t('org.colName')}</th>
+                  <th className="py-2 text-center">{t('org.colLastVote')}</th>
+                  <th className="py-2 text-right">{t('org.colPoints')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
                 {sortedPlayers.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="py-4 text-center text-slate-400">
-                      Nenhum pai conectado na sala ainda.
+                      {t('org.noPlayersTable')}
                     </td>
                   </tr>
                 ) : (
@@ -407,14 +409,14 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
                       <td className="py-2 font-medium text-white">{p.name}</td>
                       <td className="py-2 text-center">
                         {p.last_vote === 'BOIA' ? (
-                          <span className="text-emerald-400 font-bold">BOIA</span>
+                          <span className="text-emerald-400 font-bold">{t('common.float')}</span>
                         ) : p.last_vote === 'AFUNDA' ? (
-                          <span className="text-purple-400 font-bold">AFUNDA</span>
+                          <span className="text-purple-400 font-bold">{t('common.sink')}</span>
                         ) : (
                           <span className="text-slate-500">-</span>
                         )}
                       </td>
-                      <td className="py-2 text-right font-mono font-bold text-cyanNeon">{p.score} pts</td>
+                      <td className="py-2 text-right font-mono font-bold text-cyanNeon">{t('common.pts', { n: p.score })}</td>
                     </tr>
                   ))
                 )}
@@ -428,14 +430,14 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
       <div className="flex justify-center pb-4">
         <button
           onClick={() => {
-            if (confirm('Deseja realmente reiniciar todo o jogo e placar?')) {
+            if (confirm(t('org.resetConfirm'))) {
               actions.resetGame();
             }
           }}
           className="px-4 py-2 text-sm bg-rose-500/20 hover:bg-rose-500/40 border border-rose-500/40 text-rose-200 rounded-xl transition-all flex items-center gap-2 font-semibold"
         >
           <RotateCcw className="w-4 h-4" />
-          Reiniciar Sala
+          {t('org.resetRoom')}
         </button>
       </div>
     </div>
@@ -444,6 +446,7 @@ export function OrganizerView({ room, players }: OrganizerViewProps) {
 
 function Podium({ players }: { players: Player[] }) {
   const [first, second, third] = players;
+  const { t } = useI18n();
 
   const PodiumPlace = ({ player, place, height, emoji, color, border }: {
     player?: Player; place: number; height: string; emoji: string; color: string; border: string;
@@ -452,7 +455,7 @@ function Podium({ players }: { players: Player[] }) {
       <div className="text-xs font-bold text-white truncate max-w-[90px]" title={player?.name || ''}>
         {player?.name || '-'}
       </div>
-      <div className="text-[10px] text-cyanNeon font-mono font-bold">{player ? `${player.score}pt` : ''}</div>
+      <div className="text-[10px] text-cyanNeon font-mono font-bold">{player ? t('common.pts', { n: player.score }) : ''}</div>
       <div
         className={`w-full ${height} bg-gradient-to-t ${color} rounded-t-xl border-t-2 ${border} flex items-center justify-center font-black text-3xl ${emoji} shadow-lg`}
       >

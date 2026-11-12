@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import type { Room } from '@/lib/supabase';
+import { useI18n } from '@/lib/i18n';
 
 interface AquariumProps {
   room: Room | null;
 }
 
 export function Aquarium({ room }: AquariumProps) {
+  const { t } = useI18n();
   const [bubbles, setBubbles] = useState<{ left: number; size: number; delay: number; duration: number }[]>([]);
 
   useEffect(() => {
@@ -64,9 +66,9 @@ export function Aquarium({ room }: AquariumProps) {
         <div className="absolute inset-0 bg-ocean-900/70 backdrop-blur-md flex flex-col items-center justify-center gap-3 z-30">
           <div className="text-5xl animate-spin">🌀</div>
           <div className="text-xl font-extrabold text-yellowNeon tracking-wider animate-pulse">
-            TESTE EM EXECUÇÃO...
+            {t('aquarium.testTitle')}
           </div>
-          <p className="text-xs text-cyan-200">O item está caindo no tanque de água!</p>
+          <p className="text-xs text-cyan-200">{t('aquarium.testDesc')}</p>
         </div>
       )}
     </div>

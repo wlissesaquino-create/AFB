@@ -1,25 +1,26 @@
 import type { Room } from './supabase';
+import type { Language } from './translations';
 
 export function generateRoomCode(): string {
   return String(Math.floor(1000 + Math.random() * 9000));
 }
 
-export const ITEM_PRESETS: { name: string; emoji: string }[] = [
-  { name: 'Elefante', emoji: '🐘' },
-  { name: 'Maçã', emoji: '🍎' },
-  { name: 'Chave', emoji: '🔑' },
-  { name: 'Melancia', emoji: '🍉' },
-  { name: 'Bola de Futebol', emoji: '⚽' },
-  { name: 'Carrinho', emoji: '🚗' },
-  { name: 'Celular', emoji: '📱' },
-  { name: 'Garrafa', emoji: '🍾' },
-  { name: 'Patinho', emoji: '🦆' },
-  { name: 'Ovo Cru', emoji: '🥚' },
-  { name: 'Pedra', emoji: '🪨' },
-  { name: 'Barco', emoji: '⛵' },
-  { name: 'Tijolo', emoji: '🧱' },
-  { name: 'Balão', emoji: '🎈' },
-  { name: 'Pena', emoji: '🪶' },
+export const ITEM_PRESETS: { name: Record<Language, string>; emoji: string }[] = [
+  { name: { pt: 'Elefante', en: 'Elephant' }, emoji: '🐘' },
+  { name: { pt: 'Maçã', en: 'Apple' }, emoji: '🍎' },
+  { name: { pt: 'Chave', en: 'Key' }, emoji: '🔑' },
+  { name: { pt: 'Melancia', en: 'Watermelon' }, emoji: '🍉' },
+  { name: { pt: 'Bola de Futebol', en: 'Soccer Ball' }, emoji: '⚽' },
+  { name: { pt: 'Carrinho', en: 'Toy Car' }, emoji: '🚗' },
+  { name: { pt: 'Celular', en: 'Phone' }, emoji: '📱' },
+  { name: { pt: 'Garrafa', en: 'Bottle' }, emoji: '🍾' },
+  { name: { pt: 'Patinho', en: 'Rubber Duck' }, emoji: '🦆' },
+  { name: { pt: 'Ovo Cru', en: 'Raw Egg' }, emoji: '🥚' },
+  { name: { pt: 'Pedra', en: 'Rock' }, emoji: '🪨' },
+  { name: { pt: 'Barco', en: 'Boat' }, emoji: '⛵' },
+  { name: { pt: 'Tijolo', en: 'Brick' }, emoji: '🧱' },
+  { name: { pt: 'Balão', en: 'Balloon' }, emoji: '🎈' },
+  { name: { pt: 'Pena', en: 'Feather' }, emoji: '🪶' },
 ];
 
 export function calculatePoints(room: Room, reactionMs: number): number {

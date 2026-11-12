@@ -1,11 +1,12 @@
+import { useI18n } from '@/lib/i18n';
+
 interface QRCodeProps {
   value: string;
   size?: number;
 }
 
-// Simple QR code generation using a public API-free approach
-// We render a styled QR placeholder that links to the join URL
 export function QRCode({ value, size = 140 }: QRCodeProps) {
+  const { t } = useI18n();
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`;
 
   return (
@@ -15,13 +16,13 @@ export function QRCode({ value, size = 140 }: QRCodeProps) {
     >
       <img
         src={qrUrl}
-        alt="QR Code para entrar na sala"
+        alt={t('qr.alt')}
         width={size}
         height={size}
         className="rounded-lg"
       />
       <span className="text-[9px] font-black text-ocean-900 uppercase tracking-tight mt-1">
-        Escanear
+        {t('qr.scan')}
       </span>
     </div>
   );

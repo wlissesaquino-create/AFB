@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { LifeBuoy, Anchor, Zap, CheckCircle2, XCircle, Clock, Trophy, LogOut } from 'lucide-react';
 import type { Room, Player } from '@/lib/supabase';
 import { useGameActions } from '@/lib/useGame';
+import { useI18n } from '@/lib/i18n';
 
 interface PlayerViewProps {
   room: Room;
@@ -13,6 +14,7 @@ interface PlayerViewProps {
 
 export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerViewProps) {
   const actions = useGameActions(room, player?.id || null);
+  const { t } = useI18n();
   const [name, setName] = useState('');
   const [joining, setJoining] = useState(false);
   const [joinError, setJoinError] = useState('');
@@ -52,7 +54,7 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
 
   const handleJoin = async () => {
     if (!name.trim()) {
-      setJoinError('Digite seu nome ou nome da família.');
+      setJoinError(t('player.nameRequired'));
       return;
     }
     setJoining(true);
@@ -60,7 +62,7 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
     const result = await onJoin(name.trim());
     setJoining(false);
     if (!result) {
-      setJoinError('Erro ao entrar na sala. Tente novamente.');
+      setJoinError(t('player.joinError'));
     }
   };
 
@@ -82,13 +84,13 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
         <div className="glass-card-glow rounded-3xl p-6 space-y-6 text-center shadow-2xl">
           <div className="space-y-2">
             <div className="text-5xl animate-bounce">🎈⚓</div>
-            <h2 className="text-2xl font-extrabold text-white">Entrar no Game Show</h2>
-            <p className="text-xs text-cyan-200">Digite seu nome e o código que aparece na tela do evento</p>
+            <h2 className="text-2xl font-extrabold text-white">{t('player.joinTitle')}</h2>
+            <p className="text-xs text-cyan-200">{t('player.joinSubtitle')}</p>
           </div>
 
           <div className="space-y-3 text-left">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Código da Sala:</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">{t('player.roomCodeLabel')}</label>
               <input
                 type="text"
                 value={room.code}
@@ -97,13 +99,13 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Seu Nome / Nome da Família:</label>
+              <label className="block text-xs font-semibold text-slate-300 mb-1">{t('player.nameLabel')}</label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
-                placeholder="Ex: Família Silva / Mãe do Lucas"
+                placeholder={t('player.namePlaceholder')}
                 className="w-full bg-ocean-900 border border-cyanNeon/50 rounded-xl px-4 py-3 text-white font-medium focus:outline-none focus:border-cyanNeon"
                 autoFocus
               />
@@ -120,7 +122,7 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
             disabled={joining}
             className="w-full py-4 bg-gradient-to-r from-yellowNeon to-amber-500 hover:from-yellow-300 hover:to-amber-600 text-ocean-900 font-black rounded-2xl shadow-xl text-lg tracking-wide transition-all active:scale-95 disabled:opacity-50"
           >
-            {joining ? 'ENTRANDO...' : 'ENTRAR NO JOGO'}
+            {joining ? t('player.joining') : t('player.enterGame')}
           </button>
         </div>
       </div>
@@ -137,11 +139,11 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
       {/* Player header */}
       <div className="glass-card rounded-2xl p-4 flex items-center justify-between border-b-2 border-b-cyanNeon">
         <div className="min-w-0 flex-1">
-          <div className="text-xs text-slate-400">Participante</div>
+          <div className="text-xs text-slate-400">{t('player.participant')}</div>
           <div className="text-base font-extrabold text-cyanNeon truncate">{player.name}</div>
         </div>
         <div className="text-right">
-          <div className="text-xs text-slate-400">Pontuação</div>
+          <div className="text-xs text-slate-400">{t('player.score')}</div>
           <div className="text-xl font-black text-yellowNeon font-mono">{player.score} pts</div>
         </div>
       </div>
@@ -150,9 +152,9 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
       <div className="glass-card-glow rounded-3xl p-6 text-center space-y-5 relative overflow-hidden">
         <div className="space-y-1">
           <span className="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-cyanNeon/20 text-cyanNeon border border-cyanNeon/30">
-            Rodada {room.round_number}
+            {t('common.round', { n: room.round_number })}
           </span>
-          <h3 className="text-xs text-slate-300 uppercase tracking-wider mt-2">Qual seu palpite para:</h3>
+          <h3 className="text-xs text-slate-300 uppercase tracking-wider mt-2">{t('player.guessFor')}</h3>
           <div className="text-3xl font-black text-white drop-shadow flex items-center justify-center gap-2">
             {room.current_object_name} {room.current_emoji}
           </div>
@@ -162,7 +164,7 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
         {countdown !== null && (
           <div className="py-8">
             <div className="text-xs uppercase font-bold tracking-widest text-yellowNeon mb-2 animate-pulse">
-              Prepare-se...
+              {t('player.getReady')}
             </div>
             <div
               key={countdown}
@@ -170,7 +172,7 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
             >
               {countdown}
             </div>
-            <div className="text-sm text-slate-300 mt-2">Botões bloqueados!</div>
+            <div className="text-sm text-slate-300 mt-2">{t('player.buttonsLocked')}</div>
           </div>
         )}
 
@@ -184,14 +186,14 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
                 className="py-5 px-4 bg-gradient-to-r from-emerald-400 to-teal-500 hover:from-emerald-300 hover:to-teal-400 text-ocean-900 font-black text-2xl rounded-2xl shadow-xl border-2 border-emerald-300/50 transition-all transform active:scale-95 flex items-center justify-center gap-3"
               >
                 <LifeBuoy className="w-8 h-8" />
-                BOIA!
+                {t('player.voteFloat')}
               </button>
               <button
                 onClick={() => handleVote('AFUNDA')}
                 className="py-5 px-4 bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-500 hover:to-purple-600 text-white font-black text-2xl rounded-2xl shadow-xl border-2 border-purple-400/50 transition-all transform active:scale-95 flex items-center justify-center gap-3"
               >
                 <Anchor className="w-8 h-8" />
-                AFUNDA!
+                {t('player.voteSink')}
               </button>
             </div>
           </>
@@ -202,15 +204,15 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
           <div className="py-4 px-3 bg-ocean-900/90 rounded-2xl border border-cyanNeon/40 space-y-2 animate-pop-in">
             <div className="text-sm font-bold text-cyanNeon flex items-center justify-center gap-2">
               <CheckCircle2 className="w-5 h-5" />
-              Palpite Registrado!
+              {t('player.registered')}
             </div>
             <div className="text-xs text-slate-300">
-              Você palpitou{' '}
-              <span className="font-bold text-yellowNeon">{voteFeedback.vote}</span>. Aguarde o teste no projetor!
+              {t('player.youGuessed')}{' '}
+              <span className="font-bold text-yellowNeon">{voteFeedback.vote === 'BOIA' ? t('common.float') : t('common.sink')}</span>{t('player.waitTest')}
             </div>
             <div className="text-xs text-cyan-200 flex items-center justify-center gap-1">
               <Zap className="w-3 h-3" />
-              Tempo de reação: {(voteFeedback.reactionMs / 1000).toFixed(1)}s
+              {t('player.reactionTime', { s: (voteFeedback.reactionMs / 1000).toFixed(1) })}
             </div>
           </div>
         )}
@@ -219,16 +221,16 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
         {room.status === 'testing' && !voteFeedback && (
           <div className="py-8 px-3 bg-ocean-900/90 rounded-2xl border border-yellowNeon/40 space-y-2">
             <div className="text-4xl animate-spin">🌀</div>
-            <div className="text-lg font-extrabold text-yellowNeon">TESTE EM EXECUÇÃO!</div>
-            <div className="text-xs text-cyan-200">Olhe para a tela do evento para ver o aquário!</div>
+            <div className="text-lg font-extrabold text-yellowNeon">{t('player.testRunning')}</div>
+            <div className="text-xs text-cyan-200">{t('player.lookAtScreen')}</div>
           </div>
         )}
 
         {/* Testing state with vote already cast */}
         {room.status === 'testing' && voteFeedback && (
           <div className="py-4 px-3 bg-ocean-900/90 rounded-2xl border border-yellowNeon/40 space-y-2">
-            <div className="text-sm font-bold text-yellowNeon">Teste em Execução!</div>
-            <div className="text-xs text-cyan-200">Aguarde o resultado...</div>
+            <div className="text-sm font-bold text-yellowNeon">{t('player.testRunningShort')}</div>
+            <div className="text-xs text-cyan-200">{t('player.waitResult')}</div>
           </div>
         )}
 
@@ -243,15 +245,15 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
           >
             <div className="text-4xl">{player.last_correct ? '🎉' : '😅'}</div>
             <div className={`text-xl font-extrabold ${player.last_correct ? 'text-emerald-300' : 'text-slate-300'}`}>
-              {player.last_correct ? 'VOCÊ ACERTOU!' : 'NÃO FOI DESSA VEZ!'}
+              {player.last_correct ? t('player.correct') : t('player.wrong')}
             </div>
             <div className="text-sm font-bold text-yellowNeon">
-              {player.last_correct ? `+${player.last_points} PONTOS!` : '+0 PONTOS'}
+              {player.last_correct ? t('player.pointsGained', { n: player.last_points }) : t('player.pointsZero')}
             </div>
             {player.last_correct && player.last_reaction_ms != null && (
               <div className="text-xs text-cyan-200 flex items-center justify-center gap-1">
                 <Zap className="w-3 h-3" />
-                Tempo: {(player.last_reaction_ms / 1000).toFixed(1)}s
+                {t('player.timeTaken', { s: (player.last_reaction_ms / 1000).toFixed(1) })}
               </div>
             )}
           </div>
@@ -260,25 +262,25 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
         {/* Lobby / waiting state */}
         {room.status === 'lobby' && !voteFeedback && (
           <div className="py-4 px-3 bg-ocean-900/90 rounded-2xl border border-cyanNeon/40 space-y-2">
-            <div className="text-sm font-bold text-cyanNeon">Aguardando o Organizador...</div>
-            <div className="text-xs text-slate-300">A próxima rodada começará em breve!</div>
+            <div className="text-sm font-bold text-cyanNeon">{t('player.waitingOrganizer')}</div>
+            <div className="text-xs text-slate-300">{t('player.nextRoundSoon')}</div>
           </div>
         )}
 
         {/* Vote was cast and we're back in lobby (between rounds) */}
         {voteFeedback && room.status === 'lobby' && (
           <div className="py-4 px-3 bg-ocean-900/90 rounded-2xl border border-cyanNeon/40 space-y-2">
-            <div className="text-sm font-bold text-cyanNeon">Aguardando o Organizador...</div>
-            <div className="text-xs text-slate-300">A próxima rodada começará em breve!</div>
+            <div className="text-sm font-bold text-cyanNeon">{t('player.waitingOrganizer')}</div>
+            <div className="text-xs text-slate-300">{t('player.nextRoundSoon')}</div>
           </div>
         )}
       </div>
 
       {/* Rank badge */}
       <div className="glass-card rounded-2xl p-4 text-center flex items-center justify-between">
-        <span className="text-xs text-slate-300">Sua Posição no Ranking:</span>
+        <span className="text-xs text-slate-300">{t('player.rankPosition')}</span>
         <span className="text-sm font-extrabold text-cyanNeon">
-          #{myRank}º Lugar {rankEmoji}
+          {t('player.rankPlace', { n: myRank })} {rankEmoji}
         </span>
       </div>
 
@@ -288,13 +290,14 @@ export function PlayerView({ room, player, players, onJoin, onLeave }: PlayerVie
         className="w-full py-2 text-xs text-slate-400 hover:text-rose-400 transition-all flex items-center justify-center gap-2"
       >
         <LogOut className="w-4 h-4" />
-        Sair da Sala
+        {t('player.leave')}
       </button>
     </div>
   );
 }
 
 function TimerBar({ room }: { room: Room }) {
+  const { t } = useI18n();
   const [remaining, setRemaining] = useState(room.timer_seconds);
 
   useEffect(() => {
@@ -319,7 +322,7 @@ function TimerBar({ room }: { room: Room }) {
       <div className="flex justify-between text-xs text-slate-300">
         <span className="flex items-center gap-1">
           <Clock className="w-3 h-3" />
-          Tempo restante
+          {t('player.timeLeft')}
         </span>
         <span className="font-mono font-bold text-cyanNeon">{remaining.toFixed(1)}s</span>
       </div>
